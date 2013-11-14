@@ -250,6 +250,13 @@ class Chef
       def ssh_command
         command = render_template(read_template)
 
+        if config[:use_sudo] and config[:use_sudo_password] and 
+            (config[:ssh_password].nil? || config[:ssh_password].empty?)
+          tmpssh = Chef::Knife::Ssh.new
+          tmpssh.ui = ui
+          config[:ssh_password] = tmpssh.prompt_for_password
+        end
+
         if config[:use_sudo]
           command = config[:use_sudo_password] ? "echo '#{config[:ssh_password]}' | sudo -S #{command}" : "sudo #{command}"
         end
